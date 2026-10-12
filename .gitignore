@@ -1,0 +1,19 @@
+# Local manuscript build products
+manuscript/*.aux
+manuscript/*.bbl
+manuscript/*.blg
+manuscript/*.log
+manuscript/*.out
+manuscript/*.fls
+manuscript/*.fdb_latexmk
+manuscript/*.synctex.gz
+
+# Local analysis outputs and data must not enter this submission snapshot.
+.Rhistory
+.RData
+*.rds
+*.RDS
+*.RData
+*.xpt
+*.XPT
+__pycache__/
