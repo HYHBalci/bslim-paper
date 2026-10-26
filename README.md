@@ -1,6 +1,6 @@
 # B-SLIM paper — version 8.3.6
 
-Latest manuscript, supplement, and analysis scripts for *A BART Sparse Linear Interactions Model for Heterogeneous Treatment Effects*.
+Latest manuscript, supplement, and analysis scripts for *B-SLIM: BART Sparse Linear Interactions Model for Heterogeneous Treatment Effects*.
 
 - `manuscript/`: version 8.3.6 main paper and supplement, as PDF and LaTeX, with their bibliography and figures.
 - `simulations/`: synthetic simulations, orthogonalisation, and IHDP analyses.
