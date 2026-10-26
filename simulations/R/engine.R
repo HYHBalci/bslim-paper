@@ -40,7 +40,7 @@ protocol_identity <- function(cfg) {
 }
 check_environment <- function(suite,cfg) {
   if(!suite %in% suite_names) stop("Unknown suite")
-  need_packages(c("spbart","arm","digest","posterior"))
+  need_packages(c("bslim","arm","digest","posterior"))
   check_variance_repair()
   if(suite=="ihdp") {
     need_packages(c("SuperLearner","gam","glmnet","xgboost","ranger","grf"))
@@ -50,7 +50,7 @@ check_environment <- function(suite,cfg) {
   if(!identical(as.integer(cfg$ihdp_folds),10L)) stop("This manuscript protocol requires ten IHDP outer folds")
   if(any(!cfg$replicates %in% 1:200) || any(!cfg$ihdp_replicates %in% 1:100)) stop("Replicate outside protocol grid")
   cat("R libraries:\n",paste(.libPaths(),collapse="\n"),"\n",sep="")
-  cat("spbart:",as.character(packageVersion("spbart")),"; Gibbs=TRUE, hn_scale=1\n")
+  cat("spbart:",as.character(packageVersion("bslim")),"; Gibbs=TRUE, hn_scale=1\n")
   if(suite=="ortho") {
     check_fixed_external_package()
     cat("Fixed external orthogonalisation: no propensity in the forest and no internal propensity draws.\n")
@@ -83,7 +83,7 @@ print_manifest <- function(cfg) {
   }
 }
 run_chain <- function(request_file,chain,cfg) {
-  need_packages(c("digest","spbart"))
+  need_packages(c("digest","bslim"))
   request <- readRDS(request_file)
   validate_request(request)
   if(!identical(protocol_identity(cfg),request$identity)) stop("Code/package/config changed after request creation")

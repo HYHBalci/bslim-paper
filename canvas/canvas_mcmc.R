@@ -135,8 +135,8 @@ canvas_fit_chains <- function(model, Xtr, Ytr, Ztr, Xte, Zte, propensity, seed,
   if (length(propensity) != 1L || !is.finite(propensity) || propensity <= 0 || propensity >= 1)
     stop("CANVAS propensity must be one training-pool treatment proportion between zero and one")
   seeds <- canvas_chain_seeds(seed, model, settings$chains)
-  if (is.null(fit_function)) fit_function <- if (model == "BCF") spbart::bcf else spbart::bcf_linear_probit
-  if (is.null(predict_function)) predict_function <- if (model == "BCF") stats::predict else spbart::predict_linear_bcf
+  if (is.null(fit_function)) fit_function <- if (model == "BCF") bslim::bcf else bslim::bcf_linear_probit
+  if (is.null(predict_function)) predict_function <- if (model == "BCF") stats::predict else bslim::predict_linear_bcf
   diagnostic_chains <- vector("list", settings$chains)
   coefficients <- vector("list", settings$chains)
   keep_scale_draws <- identical(tolower(Sys.getenv("BCF_KEEP_SCALE_DRAWS", "false")), "true")

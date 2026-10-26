@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 Push-Location -LiteralPath $PSScriptRoot
 try {
-    $documents = @('methodology-8.3.5', 'methodology-8.3.5-supplement')
+    $documents = @('methodology-8.3.6', 'methodology-8.3.6-supplement')
     foreach ($document in $documents) {
         & pdflatex -interaction=nonstopmode -halt-on-error "$document.tex"
         if ($LASTEXITCODE -ne 0) { throw "LaTeX failed: $document" }

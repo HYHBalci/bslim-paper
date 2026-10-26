@@ -53,13 +53,13 @@ library(tidyr)
 library(ggplot2)
 library(gridExtra)
 library(grid)
-library(spbart)
+library(bslim)
 
 # A source checkout update is not an installed-package update. Stop before
 # touching participant inputs if this R session lacks the Gaussian repair.
 check_hchs_gibbs_package <- function(helper = NULL) {
   if (is.null(helper)) {
-    ns <- asNamespace("spbart")
+    ns <- asNamespace("bslim")
     if (!exists(".hchs_variance_parameters", ns, inherits = FALSE))
       stop("Install the repaired Gaussian hc-hs spbart build in this R session's library before running CANVAS.")
     helper <- get(".hchs_variance_parameters", ns)
@@ -924,12 +924,12 @@ identity_helpers <- c("check_hchs_gibbs_package", "standardize_X_by_index", "gp_
   "canvas_gp", "canvas_fit_chains", "canvas_chain_seeds", "canvas_diagnostics", "canvas_parameter_group", "canvas_diagnostic_groups", "canvas_mcmc_settings", "save_fit_diagnostics",
   "canvas_draw_matrix", "canvas_coefficient_matrix", "predict_linear_bcf_patched", "get_uplift", "get_auuc", "get_net_auuc", "get_calibration", "draw_metrics")
 analysis_code <- setNames(lapply(identity_helpers, function(nm) function_signature(get(nm))), identity_helpers)
-analysis_code$loaded_linear_fit <- function_signature(spbart::bcf_linear_probit)
-analysis_code$loaded_bcf_fit <- function_signature(spbart::bcf)
+analysis_code$loaded_linear_fit <- function_signature(bslim::bcf_linear_probit)
+analysis_code$loaded_bcf_fit <- function_signature(bslim::bcf)
 input_hashes <- setNames(unname(tools::md5sum(c(CFG$train_file, CFG$test_file))), c("train", "validation"))
 if (anyNA(input_hashes)) stop("Cannot fingerprint both restricted input files.")
 RUN_IDENTITY <- make_run_identity(CFG,
-  package_builds = lapply(c("spbart", "dplyr", "posterior"), package_fingerprint), input_hashes = input_hashes,
+  package_builds = lapply(c("bslim", "dplyr", "posterior"), package_fingerprint), input_hashes = input_hashes,
   design_hash = object_md5(list(X_train_full, Y_train_full, Z_train_full, X_test, Y_test, Z_test,
                                results_combined$X_final_var_info)), analysis_code = analysis_code)
 manifest_file <- out_path("canvas_run_", CFG$tag, ".rds")

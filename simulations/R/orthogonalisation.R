@@ -152,7 +152,7 @@ orthogonalisation_pooled_metrics <- function(chains, data) {
 orthogonalisation_preflight <- function(cfg, fit_function = NULL) {
   # An actual tiny Gaussian Gibbs fit verifies fixed-input semantics and native
   # capability. This is not convergence or frequentist coverage validation.
-  if (is.null(fit_function)) fit_function <- getExportedValue("spbart", "bcf_linear_probit")
+  if (is.null(fit_function)) fit_function <- getExportedValue("bslim", "bcf_linear_probit")
   generated <- generate_data_medical(n = 48L, is_te_hetero = TRUE,
     is_mu_nonlinear = TRUE, seed = 81033L, RCT = FALSE, scenario = "default",
     z_diff = 0.5, BCF = FALSE, sigma_sq = 1)

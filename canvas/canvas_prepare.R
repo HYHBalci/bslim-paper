@@ -70,7 +70,7 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(tidyr)
   library(ggplot2)
-  library(spbart)
+  library(bslim)
 })
 
 # ==============================================================================
@@ -705,8 +705,8 @@ write.csv(sp_run$diagnostics, file.path(CFG$out_dir, "mcmc_diagnostics_SemiParam
 write.csv(sp_run$diagnostic_groups, file.path(CFG$out_dir, "mcmc_diagnostic_groups_SemiParam.csv"), row.names = FALSE)
 mcmc_manifest <- list(protocol = "canvas-independent-4chain-mu-propensity-8.3.5",
   BCF = bcf_run$mcmc, SemiParam = sp_run$mcmc,
-  package = as.character(utils::packageVersion("spbart")),
-  package_description = utils::packageDescription("spbart"),
+  package = as.character(utils::packageVersion("bslim")),
+  package_description = utils::packageDescription("bslim"),
   analysis_code_hashes = tools::md5sum(file.path(CANVAS_CODE_DIR, c("canvas_mcmc.R", "canvas_prepare.R"))),
   input_hashes = tools::md5sum(vapply(CFG$studies, `[[`, character(1), "out")))
 saveRDS(mcmc_manifest, file.path(CFG$out_dir, "mcmc_manifest.rds"))

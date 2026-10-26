@@ -18,7 +18,7 @@ if (nzchar(rlib)) .libPaths(c(rlib, .libPaths()))
 for (file in c("common.R", "data_generator.R", "main.R"))
   source(file.path(root, "R", file))
 source(file.path(root, "config.R"))
-need_packages(c("spbart", "arm", "jsonlite", "digest"))
+need_packages(c("bslim", "arm", "jsonlite", "digest"))
 check_variance_repair()
 stopifnot(config$chains == 4L, config$gfr == 25L,
           config$burnin == 2000L, config$draws == 4000L)
@@ -68,7 +68,7 @@ pi <- data$pi_train
 gfr <- config$gfr
 burnin <- config$burnin
 draws <- config$draws
-fit_function <- spbart::bcf_linear_probit
+fit_function <- bslim::bcf_linear_probit
 seeds <- vapply(seq_len(config$chains), function(k) fit_seed(job, k), integer(1))
 general_parameters <- lapply(seeds, gp_hchs, cfg = config)
 timings <- vector("list", config$chains)
@@ -107,13 +107,13 @@ for (chain in seq_len(config$chains)) {
 timings <- do.call(rbind, timings)
 stopifnot(nrow(timings) == 4L, all(is.finite(timings$elapsed_seconds)),
           all(timings$elapsed_seconds > 0), !anyDuplicated(timings$seed))
-pd <- utils::packageDescription("spbart")
+pd <- utils::packageDescription("bslim")
 source_files <- c("benchmark_fit.R", "config.R", "R/common.R",
                   "R/data_generator.R", "R/main.R")
 record <- list(
   complete = TRUE, started_utc = started_utc,
   finished_utc = format(Sys.time(), tz = "UTC", usetz = TRUE),
-  timing_scope = "Only spbart::bcf_linear_probit calls; excludes data generation, external propensity estimation, package loading, validation, posterior processing, and file output",
+  timing_scope = "Only bslim::bcf_linear_probit calls; excludes data generation, external propensity estimation, package loading, validation, posterior processing, and file output",
   execution = "Four independent chains run sequentially in one R process",
   fit_groups = 1L, job = job, chains = config$chains,
   gfr_per_chain = gfr, burnin_per_chain = burnin, retained_draws_per_chain = draws,
@@ -121,12 +121,12 @@ record <- list(
   chain_timings = timings, total_fitting_seconds = sum(timings$elapsed_seconds),
   hardware = hardware,
   software = list(R = R.version.string, platform = R.version$platform,
-    spbart = as.character(utils::packageVersion("spbart")),
+    bslim = as.character(utils::packageVersion("bslim")),
     arm = as.character(utils::packageVersion("arm")),
     variance_fix = pd[["Config/VarianceFix"]],
     tree_sampler_fix = pd[["Config/TreeSamplerFix"]],
     BLAS = unname(extSoftVersion()["BLAS"]),
-    dll_sha256 = digest::digest(file = getLoadedDLLs()[["spbart"]][["path"]], algo = "sha256"),
+    dll_sha256 = digest::digest(file = getLoadedDLLs()[["bslim"]][["path"]], algo = "sha256"),
     fitting_function_sha256 = hash_object(body(fit_function))),
   source_sha256 = setNames(lapply(source_files, function(path)
     digest::digest(file = file.path(root, path), algo = "sha256")), source_files),

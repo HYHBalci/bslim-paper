@@ -139,28 +139,28 @@ validate_request <- function(request) {
   invisible(TRUE)
 }
 software_identity <- function() {
-  need_packages(c("spbart","digest","posterior","arm"))
-  loadNamespace("spbart")
-  pd <- packageDescription("spbart")
-  dll <- getLoadedDLLs()[["spbart"]][["path"]]
-  pk <- c("spbart","posterior","arm","digest","SuperLearner","glmnet","gam","xgboost","ranger","grf")
+  need_packages(c("bslim","digest","posterior","arm"))
+  loadNamespace("bslim")
+  pd <- packageDescription("bslim")
+  dll <- getLoadedDLLs()[["bslim"]][["path"]]
+  pk <- c("bslim","posterior","arm","digest","SuperLearner","glmnet","gam","xgboost","ranger","grf")
   list(R=R.version.string,platform=R.version$platform,
     version=as.character(pd$Version),commit=pd$RemoteSha,
     variance_fix=pd[["Config/VarianceFix"]],
     orthogonalization=pd[["Config/Orthogonalization"]],
     fixed_external_helpers=setNames(lapply(c(".predict_linear_bcf_fixed_external",
       ".fixed_external_linear_draws", ".validate_external_propensity", ".validate_binary_treatment"),
-      function(name) if(exists(name,asNamespace("spbart"),inherits=FALSE))
-        hash_object(body(get(name,asNamespace("spbart")))) else NULL),
+      function(name) if(exists(name,asNamespace("bslim"),inherits=FALSE))
+        hash_object(body(get(name,asNamespace("bslim")))) else NULL),
       c("prediction","draws","propensity_validation","treatment_validation")),
     packages=setNames(vapply(pk,function(p)tryCatch(as.character(packageVersion(p)),
       error=function(e) NA_character_),character(1)),pk),
     dll_sha256=digest::digest(file=dll,algo="sha256"),
-    sp_function=hash_object(body(spbart::bcf_linear_probit)),
-    bcf_function=hash_object(body(spbart::bcf)))
+    sp_function=hash_object(body(bslim::bcf_linear_probit)),
+    bcf_function=hash_object(body(bslim::bcf)))
 }
 check_variance_repair <- function() {
-  ns <- asNamespace("spbart")
+  ns <- asNamespace("bslim")
   if(!exists(".hchs_variance_parameters",ns,inherits=FALSE))
     stop("Installed spbart does not expose the repaired Gaussian hc-hs variance helper. ",
          "Check the library used INSIDE the Helios container; updating the source folder is not installation.")
@@ -171,10 +171,10 @@ check_variance_repair <- function() {
   invisible(TRUE)
 }
 check_fixed_external_package <- function() {
-  pd <- utils::packageDescription("spbart")
+  pd <- utils::packageDescription("bslim")
   if(!identical(pd[["Config/Orthogonalization"]],"fixed-external-propensity-20260921") ||
-     utils::packageVersion("spbart") < "0.1.1.9004" ||
-     !exists(".predict_linear_bcf_fixed_external",asNamespace("spbart"),inherits=FALSE))
+     utils::packageVersion("bslim") < "0.1.1.9004" ||
+     !exists(".predict_linear_bcf_fixed_external",asNamespace("bslim"),inherits=FALSE))
     stop("Orthogonalisation requires the installed fixed-external-propensity spbart build ",
          "0.1.1.9004 (commit 85d2a845) or a compatible newer build. Reinstall it in the ",
          "R library visible INSIDE the Helios container; a Git pull alone is not installation.")
@@ -220,14 +220,14 @@ semiparam_draws <- function(fit,X) {
 sp_prognosis <- function(fit,X,pi) {
   if(!is.null(fit$model_params$propensity_covariate) &&
      fit$model_params$propensity_covariate %in% c("mu","both")) X <- cbind(X,pi)
-  ds <- spbart::createForestDataset(X)
+  ds <- bslim::createForestDataset(X)
   m <- fit$forests_mu$predict(ds)
   s <- if(isTRUE(fit$model_params$standardize)) fit$model_params$outcome_scale else 1
   b <- if(isTRUE(fit$model_params$standardize)) fit$model_params$outcome_mean else 0
   as.numeric(rowMeans(m)*s+b)
 }
 extract_sp <- function(fit,X_eval,cfg,z_eval=NULL,pi_eval=NULL) {
-  X_eval <- get("preprocessPredictionData",asNamespace("spbart"))(X_eval,fit$train_set_metadata)
+  X_eval <- get("preprocessPredictionData",asNamespace("bslim"))(X_eval,fit$train_set_metadata)
   out <- semiparam_draws(fit,X_eval)
   strict_draws(out$tau,nrow(X_eval),cfg$draws)
   sigma <- as.vector(fit$sigma2_global_samples)
@@ -273,7 +273,7 @@ fit_sp_chain <- function(X_train,y_train,z_binary,X_eval,pi_train,pi_eval,seed,c
     if(!identical(as.numeric(z),as.numeric(z_binary)))
       stop("Supply raw binary treatment to the fixed external orthogonalisation arm")
   }
-  fit <- spbart::bcf_linear_probit(X_train=X_train,y_train=y_train,Z_train=z,
+  fit <- bslim::bcf_linear_probit(X_train=X_train,y_train=y_train,Z_train=z,
     propensity_train=pi_train,num_gfr=cfg$gfr,num_burnin=cfg$burnin,
     num_mcmc=cfg$draws,general_params=gp)
   if(isTRUE(gp$orthogonalize) &&
@@ -287,7 +287,7 @@ fit_bcf_chain <- function(X_train,y_train,z_binary,X_eval,pi_train,pi_eval,seed,
   gp <- modifyList(list(cutpoint_grid_size=100,standardize=TRUE,propensity_covariate="mu",
     adaptive_coding=TRUE,random_seed=seed,num_chains=1L,keep_burnin=FALSE,
     keep_gfr=FALSE,keep_every=1L,verbose=FALSE,probit_outcome_model=FALSE),extra_gp)
-  fit <- spbart::bcf(X_train=X_train,y_train=y_train,Z_train=z_binary,
+  fit <- bslim::bcf(X_train=X_train,y_train=y_train,Z_train=z_binary,
     propensity_train=pi_train,num_gfr=cfg$gfr,num_burnin=cfg$burnin,
     num_mcmc=cfg$draws,general_params=gp)
   if(is.null(z_eval)) z_eval <- rep(0,nrow(X_eval))

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd -- "$(dirname -- "$0")"
-documents=(methodology-8.3.5 methodology-8.3.5-supplement)
+documents=(methodology-8.3.6 methodology-8.3.6-supplement)
 for document in "${documents[@]}"; do
   pdflatex -interaction=nonstopmode -halt-on-error "$document.tex"
   bibtex "$document"
